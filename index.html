@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Financiero — Dinero Sin Fronteras</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#1a1a1a;color:#e0e0e0;padding:16px}
+h1{color:#1D9E75;font-size:20px;margin-bottom:4px}
+.subtitle{color:#888;font-size:13px;margin-bottom:20px}
+.section{background:#2a2a2a;border-radius:12px;padding:16px;border:1px solid #333;margin-bottom:12px}
+.section h3{font-size:12px;color:#9FE1CB;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+label{font-size:12px;color:#aaa;display:block;margin-bottom:3px}
+input{width:100%;background:#1a1a1a;border:1px solid #444;border-radius:8px;padding:7px 10px;color:#fff;font-size:13px;margin-bottom:8px}
+input:focus{outline:none;border-color:#1D9E75}
+.hormiga-item{background:#1a1a1a;border-radius:8px;padding:10px}
+.hormiga-item label{font-size:11px;color:#888}
+.hormiga-item input{margin-bottom:0}
+.result-card{background:#2a2a2a;border-radius:12px;padding:16px;border:1px solid #333;margin-bottom:12px;display:none}
+.result-card h3{font-size:12px;color:#9FE1CB;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.row span:first-child{font-size:12px;color:#aaa}
+.row span:last-child{font-size:13px;font-weight:600;color:#fff}
+.bar-wrap{background:#1a1a1a;border-radius:20px;height:8px;margin-bottom:12px;overflow:hidden}
+.bar{height:8px;border-radius:20px;transition:width 0.5s}
+.status{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.ok{background:#0F6E5620;color:#1D9E75;border:1px solid #1D9E75}
+.warn{background:#F9CB4220;color:#F9CB42;border:1px solid #F9CB42}
+.bad{background:#E24B4A20;color:#E24B4A;border:1px solid #E24B4A}
+.ep-label{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:5px}
+.ep-bar{background:#1a1a1a;border-radius:20px;height:14px;overflow:hidden}
+.ep-fill{height:14px;border-radius:20px;background:linear-gradient(90deg,#0F6E56,#1D9E75);transition:width 0.5s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:10px;color:#fff;font-weight:600}
+.breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.bk-item{background:#1a1a1a;border-radius:8px;padding:10px;text-align:center}
+.bk-pct{font-size:18px;font-weight:700}
+.bk-label{font-size:10px;color:#888;margin-top:2px}
+.bk-amount{font-size:11px;margin-top:2px;font-weight:600}
+.btn{width:100%;background:#1D9E75;color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.btn:hover{background:#0F6E56}
+.divider{border:none;border-top:1px solid #333;margin:12px 0}
+.tip{background:#0F6E5615;border:1px solid #0F6E5640;border-radius:8px;padding:10px 12px;font-size:12px;color:#9FE1CB;margin-top:8px}
+.hormiga-total{background:#E24B4A15;border:1px solid #E24B4A40;border-radius:8px;padding:10px 12px;margin-top:8px}
+.hormiga-total span{font-size:12px;color:#E24B4A}
+.hormiga-total strong{font-size:16px;color:#E24B4A;display:block;margin-top:2px}
+.hormiga-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #333}
+.hormiga-row:last-child{border-bottom:none}
+.hormiga-row span:first-child{font-size:12px;color:#aaa}
+.hormiga-row span:last-child{font-size:12px;font-weight:600}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;margin-left:6px}
+.tag-bad{background:#E24B4A20;color:#E24B4A}
+.tag-ok{background:#1D9E7520;color:#1D9E75}
+.footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #333;font-size:11px;color:#555}
+.footer a{color:#1D9E75;text-decoration:none}
+@media(max-width:500px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}.breakdown{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+<h1>💸 Dinero Sin Fronteras</h1>
+<p class="subtitle">Dashboard financiero personal — completa tus datos y obtén tu radiografía completa</p>
+
+<div class="section">
+<h3>📥 Ingresos mensuales</h3>
+<div class="grid2">
+<div>
+<label>Ingreso principal neto ($)</label>
+<input type="number" id="ingreso" placeholder="ej: 1500" oninput="calcular()">
+</div>
+<div>
+<label>Otros ingresos ($)</label>
+<input type="number" id="otros" placeholder="ej: 200" oninput="calcular()">
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>🏠 Gastos fijos esenciales</h3>
+<div class="grid2">
+<div>
+<label>Vivienda / alquiler ($)</label>
+<input type="number" id="vivienda" placeholder="ej: 500" oninput="calcular()">
+</div>
+<div>
+<label>Alimentación ($)</label>
+<input type="number" id="comida" placeholder="ej: 300" oninput="calcular()">
+</div>
+<div>
+<label>Transporte ($)</label>
+<input type="number" id="transporte" placeholder="ej: 100" oninput="calcular()">
+</div>
+<div>
+<label>Servicios básicos ($)</label>
+<input type="number" id="servicios" placeholder="luz, agua, gas" oninput="calcular()">
+</div>
+<div>
+<label>Salud / seguros ($)</label>
+<input type="number" id="salud" placeholder="ej: 80" oninput="calcular()">
+</div>
+<div>
+<label>Educación / hijos ($)</label>
+<input type="number" id="educacion" placeholder="ej: 100" oninput="calcular()">
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>💳 Deudas</h3>
+<div class="grid2">
+<div>
+<label>Pago mensual deudas ($)</label>
+<input type="number" id="deudas" placeholder="ej: 200" oninput="calcular()">
+</div>
+<div>
+<label>Total deuda acumulada ($)</label>
+<input type="number" id="deuda_total" placeholder="ej: 5000" oninput="calcular()">
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>🐜 Radiografía de gastos hormiga</h3>
+<div class="grid3">
+<div class="hormiga-item">
+<label>☕ Cafés / snacks</label>
+<input type="number" id="h_cafe" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🍔 Comida a domicilio</label>
+<input type="number" id="h_delivery" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🎬 Netflix / streaming</label>
+<input type="number" id="h_streaming" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🎵 Música / apps</label>
+<input type="number" id="h_apps" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🛍️ Compras impulsivas</label>
+<input type="number" id="h_compras" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🎮 Entretenimiento</label>
+<input type="number" id="h_juegos" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🚗 Taxis / Uber extra</label>
+<input type="number" id="h_taxi" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>📱 Suscripciones varias</label>
+<input type="number" id="h_subs" placeholder="$/mes" oninput="calcular()">
+</div>
+<div class="hormiga-item">
+<label>🍺 Salidas / social</label>
+<input type="number" id="h_social" placeholder="$/mes" oninput="calcular()">
+</div>
+</div>
+</div>
+
+<div class="section">
+<h3>🏦 Fondo de emergencia</h3>
+<div class="grid2">
+<div>
+<label>Meses objetivo (recomendado: 3–6)</label>
+<input type="number" id="meses_meta" placeholder="3" value="3" oninput="calcular()">
+</div>
+<div>
+<label>Ahorro actual en fondo ($)</label>
+<input type="number" id="fondo_actual" placeholder="ej: 500" oninput="calcular()">
+</div>
+</div>
+</div>
+
+<button class="btn" onclick="calcular()">📊 Ver mi radiografía financiera</button>
+
+<div class="result-card" id="resultado">
+<h3>📊 Tu diagnóstico financiero</h3>
+<div class="row"><span>Ingreso total mensual</span><span id="r_ingreso_total">$0</span></div>
+<div class="row"><span>Gastos fijos esenciales</span><span id="r_gastos_fijos">$0</span></div>
+<div class="row"><span>Gastos hormiga</span><span id="r_hormiga_total" style="color:#E24B4A">$0</span></div>
+<div class="row"><span>Deudas mensuales</span><span id="r_deudas">$0</span></div>
+<div class="row" style="border-top:1px solid #333;padding-top:8px;margin-top:4px">
+<span style="color:#fff;font-weight:600">Total gastos</span>
+<span id="r_total_gastos" style="color:#fff;font-weight:600">$0</span>
+</div>
+<div class="row">
+<span style="color:#1D9E75;font-weight:600">Disponible real</span>
+<span id="r_disponible" style="color:#1D9E75;font-weight:600">$0</span>
+</div>
+<hr class="divider">
+<h3 style="font-size:12px;color:#9FE1CB;margin-bottom:12px;text-transform:uppercase">🐜 Detalle gastos hormiga</h3>
+<div id="hormiga_detalle"></div>
+<div class="hormiga-total">
+<span>Total gastos hormiga al mes</span>
+<strong id="r_hormiga_mes">$0</strong>
+</div>
+<div class="hormiga-total" style="background:#F9CB4215;border-color:#F9CB4240;margin-top:6px">
+<span style="color:#F9CB42">Proyección anual de gastos hormiga</span>
+<strong id="r_hormiga_anual" style="color:#F9CB42">$0</strong>
+</div>
+<hr class="divider">
+<h3 style="font-size:12px;color:#9FE1CB;margin-bottom:12px;text-transform:uppercase">Regla 50/30/20 aplicada a ti</h3>
+<div class="breakdown">
+<div class="bk-item">
+<div class="bk-pct" style="color:#1D9E75">50%</div>
+<div class="bk-label">Necesidades</div>
+<div class="bk-amount" id="r_50" style="color:#1D9E75">$0</div>
+<div class="bk-label" id="r_50_estado" style="margin-top:4px"></div>
+</div>
+<div class="bk-item">
+<div class="bk-pct" style="color:#F9CB42">30%</div>
+<div class="bk-label">Gustos</div>
+<div class="bk-amount" id="r_30" style="color:#F9CB42">$0</div>
+<div class="bk-label" id="r_30_estado" style="margin-top:4px"></div>
+</div>
+<div class="bk-item">
+<div class="bk-pct" style="color:#7F77DD">20%</div>
+<div class="bk-label">Ahorro</div>
+<div class="bk-amount" id="r_20" style="color:#7F77DD">$0</div>
+<div class="bk-label" id="r_20_estado" style="margin-top:4px"></div>
+</div>
+</div>
+<hr class="divider">
+<h3 style="font-size:12px;color:#9FE1CB;margin-bottom:12px;text-transform:uppercase">🏦 Fondo de emergencia</h3>
+<div class="row"><span>Meta del fondo</span><span id="r_meta_fondo" style="color:#F9CB42">$0</span></div>
+<div class="row"><span>Ahorro actual</span><span id="r_fondo_actual">$0</span></div>
+<div class="row"><span>Falta para completar</span><span id="r_fondo_falta" style="color:#E24B4A">$0</span></div>
+<div style="margin:10px 0">
+<div class="ep-label"><span>Progreso</span><span id="r_fondo_pct">0%</span></div>
+<div class="ep-bar"><div class="ep-fill" id="r_fondo_bar" style="width:0%"></div></div>
+</div>
+<div class="row"><span>Tiempo estimado para completarlo</span><span id="r_tiempo_fondo" style="color:#9FE1CB">—</span></div>
+<hr class="divider">
+<h3 style="font-size:12px;color:#9FE1CB;margin-bottom:12px;text-transform:uppercase">🩺 Estado general</h3>
+<div class="row"><span>Ratio gastos / ingresos</span><span id="r_ratio">0%</span></div>
+<div class="bar-wrap"><div class="bar" id="r_bar" style="width:0%"></div></div>
+<div class="row"><span>Diagnóstico</span><span id="r_estado" class="status ok">—</span></div>
+<div id="r_tip" class="tip"></div>
+</div>
+
+<div class="footer">
+<p>💸 <a href="https://angels-newsletter-5d0ec7.beehiiv.com" target="_blank">Dinero Sin Fronteras</a> — Finanzas reales para latinoamericanos</p>
+<p style="margin-top:4px">Síguenos en X: <a href="https://x.com/AngelBagnati" target="_blank">@DineroSinFronteras</a></p>
+</div>
+
+<script>
+function fmt(n){return '$'+Math.round(n).toLocaleString('es')}
+function calcular(){
+  const ing=parseFloat(document.getElementById('ingreso').value)||0;
+  const otros=parseFloat(document.getElementById('otros').value)||0;
+  const vivienda=parseFloat(document.getElementById('vivienda').value)||0;
+  const comida=parseFloat(document.getElementById('comida').value)||0;
+  const transporte=parseFloat(document.getElementById('transporte').value)||0;
+  const servicios=parseFloat(document.getElementById('servicios').value)||0;
+  const salud=parseFloat(document.getElementById('salud').value)||0;
+  const educacion=parseFloat(document.getElementById('educacion').value)||0;
+  const deudas=parseFloat(document.getElementById('deudas').value)||0;
+  const meses=parseFloat(document.getElementById('meses_meta').value)||3;
+  const fondo_actual=parseFloat(document.getElementById('fondo_actual').value)||0;
+  const hormigas=[
+    {id:'h_cafe',label:'☕ Cafés / snacks'},
+    {id:'h_delivery',label:'🍔 Comida a domicilio'},
+    {id:'h_streaming',label:'🎬 Streaming'},
+    {id:'h_apps',label:'🎵 Apps / música'},
+    {id:'h_compras',label:'🛍️ Compras impulsivas'},
+    {id:'h_juegos',label:'🎮 Entretenimiento'},
+    {id:'h_taxi',label:'🚗 Taxis extra'},
+    {id:'h_subs',label:'📱 Suscripciones'},
+    {id:'h_social',label:'🍺 Salidas'}
+  ];
+  if(ing===0)return;
+  const total_ing=ing+otros;
+  const gastos_fijos=vivienda+comida+transporte+servicios+salud+educacion;
+  let total_hormiga=0;
+  let detalle_html='';
+  hormigas.forEach(h=>{
+    const v=parseFloat(document.getElementById(h.id).value)||0;
+    if(v>0){
+      total_hormiga+=v;
+      const pct=((v/total_ing)*100).toFixed(1);
+      const esAlto=v>50;
+      detalle_html+=`<div class="hormiga-row"><span>${h.label}</span><span>${fmt(v)}<span class="tag ${esAlto?'tag-bad':'tag-ok'}">${pct}%</span></span></div>`;
+    }
+  });
+  const total_gastos=gastos_fijos+total_hormiga+deudas;
+  const disponible=total_ing-total_gastos;
+  const r50=total_ing*0.5;
+  const r30=total_ing*0.3;
+  const r20=total_ing*0.2;
+  const meta_fondo=(gastos_fijos+deudas)*meses;
+  const falta=Math.max(0,meta_fondo-fondo_actual);
+  const pct_fondo=meta_fondo>0?Math.min(100,(fondo_actual/meta_fondo)*100):0;
+  const meses_fondo=r20>0?Math.ceil(falta/r20):0;
+  const ratio=(total_gastos/total_ing)*100;
+  document.getElementById('r_ingreso_total').textContent=fmt(total_ing);
+  document.getElementById('r_gastos_fijos').textContent=fmt(gastos_fijos);
+  document.getElementById('r_hormiga_total').textContent=fmt(total_hormiga);
+  document.getElementById('r_deudas').textContent=fmt(deudas);
+  document.getElementById('r_total_gastos').textContent=fmt(total_gastos);
+  document.getElementById('r_disponible').textContent=fmt(disponible);
+  document.getElementById('hormiga_detalle').innerHTML=detalle_html||'<p style="font-size:12px;color:#666;padding:8px 0">No ingresaste gastos hormiga.</p>';
+  document.getElementById('r_hormiga_mes').textContent=fmt(total_hormiga);
+  document.getElementById('r_hormiga_anual').textContent=fmt(total_hormiga*12);
+  document.getElementById('r_50').textContent=fmt(r50);
+  document.getElementById('r_30').textContent=fmt(r30);
+  document.getElementById('r_20').textContent=fmt(r20);
+  document.getElementById('r_50_estado').textContent=gastos_fijos<=r50?'✓ OK':'⚠ Excedido';
+  document.getElementById('r_50_estado').style.color=gastos_fijos<=r50?'#1D9E75':'#E24B4A';
+  document.getElementById('r_30_estado').textContent=total_hormiga<=r30?'✓ OK':'⚠ Excedido';
+  document.getElementById('r_30_estado').style.color=total_hormiga<=r30?'#1D9E75':'#E24B4A';
+  document.getElementById('r_20_estado').textContent=disponible>=r20?'✓ OK':'⚠ Bajo';
+  document.getElementById('r_20_estado').style.color=disponible>=r20?'#1D9E75':'#E24B4A';
+  document.getElementById('r_meta_fondo').textContent=fmt(meta_fondo);
+  document.getElementById('r_fondo_actual').textContent=fmt(fondo_actual);
+  document.getElementById('r_fondo_falta').textContent=fmt(falta);
+  document.getElementById('r_fondo_pct').textContent=Math.round(pct_fondo)+'%';
+  document.getElementById('r_fondo_bar').style.width=pct_fondo+'%';
+  document.getElementById('r_fondo_bar').textContent=pct_fondo>15?Math.round(pct_fondo)+'%':'';
+  document.getElementById('r_tiempo_fondo').textContent=falta<=0?'¡Completado! 🎉':(meses_fondo+' meses ahorrando el 20%');
+  document.getElementById('r_ratio').textContent=Math.round(ratio)+'%';
+  document.getElementById('r_bar').style.width=Math.min(ratio,100)+'%';
+  document.getElementById('r_bar').style.background=ratio<60?'#1D9E75':ratio<80?'#F9CB42':'#E24B4A';
+  let estado,clase,tip;
+  if(ratio<60){estado='Saludable ✓';clase='ok';tip='Tus gastos están bajo control. Enfócate en completar tu fondo de emergencia e invertir el 20% restante.';}
+  else if(ratio<80){estado='Precaución ⚠';clase='warn';tip='Tus gastos consumen demasiado ingreso. Revisa los gastos hormiga — ahí suele estar la fuga principal.';}
+  else{estado='Alerta 🚨';clase='bad';tip='Gastas más de lo saludable. Los gastos hormiga y deudas son prioridad. Elimina suscripciones que no uses y ataca la deuda de mayor interés.';}
+  document.getElementById('r_estado').textContent=estado;
+  document.getElementById('r_estado').className='status '+clase;
+  document.getElementById('r_tip').textContent='💡 '+tip;
+  document.getElementById('resultado').style.display='block';
+}
+</script>
+</body>
+</html>
